@@ -25,7 +25,7 @@ df1 = df1[pd.notnull(df1['case_text'])]
 # Renaming second column for a simpler name
 df1.columns = ['Outcome', 'Text'] 
 
-df2 = df1.sample(1000)
+df2 = df1.sample(2500)
 # Preprocessing of the data using tfidf
 df2['category_id'] = df2['Outcome'].factorize()[0]
 category_id_df = df2[['Outcome', 'category_id']].drop_duplicates()
@@ -37,7 +37,7 @@ tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5,
                         ngram_range=(1, 2), 
                         stop_words='english')
 
-features = tfidf.fit_transform(df2.Text).toarray()
+features = tfidf.fit_transform(df2.Text)
 labels = df2.category_id
 
 # train test split
