@@ -12,9 +12,6 @@ COPY requirements.txt requirements.txt
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Train the model
-RUN python train.py
-
 # Expose Flask API port
 EXPOSE 5000
 
