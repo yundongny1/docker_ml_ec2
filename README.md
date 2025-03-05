@@ -1,10 +1,18 @@
-# docker_ml_ec2
+# Containerizing a Python ML Model on AWS EC2
 Testing a python ML microservice - containerizing it with Docker on an AWS EC2 linux instance.
-It uses simple Flask API to communicate between user input and the trained model.
 
+### Technologies used:
+* Prometheus
+* Grafana
+* Docker
+* EC2
+* Flask
+* Python
+
+### Data source
 This microservice uses the legal_text_classification.csv from https://www.kaggle.com/datasets/amohankumar/legal-text-classification-dataset.
 
-
+### Instructions
 Assuming you are running an ubuntu instance on AWS EC2, steps for testing this application after cloning the repository:
 ```shell
 #SSH into your ubuntu instance using your key
@@ -21,9 +29,10 @@ sudo docker run --network=host
 ```
 
 These are the respective ports you want to be aware of.
-Prometheus metrics: 8000
-Prometheus UI: 9090
-Grafana UI: 3000
+
+* Prometheus metrics: 8000
+* Prometheus UI: 9090
+* Grafana UI: 3000
 
 You can connect by your_ec2_ipv4_address:port. Make sure you adjust the ec2 security settings to be able to do this.
 
