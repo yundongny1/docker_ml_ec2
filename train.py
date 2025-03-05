@@ -11,10 +11,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
 
-
 csv_file = "legal_text_classification.csv"  # Ensure this is in your container
 df = pd.read_csv(csv_file)
-
 
 
 df1 = df[['case_outcome', 'case_text']].copy()
@@ -50,11 +48,8 @@ model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 
-#
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy:.2f}")
-
-
 
 # Save model and vectorizer
 joblib.dump(model, "model.pkl")
@@ -63,16 +58,18 @@ joblib.dump(tfidf, "vectorizer.pkl")
 # Flask API for predictions
 app = Flask(__name__)
 
+#Load the model once, not every time a request is made
+model = joblib.load("model.pkl")
+vectorizer = joblib.load("vectorizer.pkl")
+
 @app.route("/predict", methods=["POST"])
+
 def predict():
     data = request.json
     text = data.get("text", "")
 
     if not text:
         return jsonify({"error": "No text provided"}), 400
-
-    model = joblib.load("model.pkl")
-    vectorizer = joblib.load("vectorizer.pkl")
 
     text_vectorized = vectorizer.transform([text])
     prediction = model.predict(text_vectorized)[0]
