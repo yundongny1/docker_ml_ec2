@@ -1,70 +1,58 @@
 import numpy as np
 import pandas as pd
 import joblib
+import time
 
 from flask import Flask, request, jsonify
-from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
+from prometheus_client import Counter, Histogram, generate_latest, start_http_server
 
-
-csv_file = "legal_text_classification.csv"  # Ensure this is in your container
+# Load data and train model
+csv_file = "legal_text_classification.csv"
 df = pd.read_csv(csv_file)
 
-
 df1 = df[['case_outcome', 'case_text']].copy()
-
-# Remove missing values (NaN)
 df1 = df1[pd.notnull(df1['case_text'])]
-
-# Renaming second column for a simpler name
-df1.columns = ['Outcome', 'Text'] 
+df1.columns = ['Outcome', 'Text']
 
 df2 = df1.sample(2500)
-# Preprocessing of the data using tfidf
 df2['category_id'] = df2['Outcome'].factorize()[0]
-category_id_df = df2[['Outcome', 'category_id']].drop_duplicates()
 
-category_to_id = dict(category_id_df.values)
-id_to_category = dict(category_id_df[['category_id', 'Outcome']].values)
-
-tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5,
-                        ngram_range=(1, 2), 
-                        stop_words='english')
-
+tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5, ngram_range=(1, 2), stop_words='english')
 features = tfidf.fit_transform(df2.Text)
 labels = df2.category_id
 
-# train test split
-X, y = features, df2['category_id']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(features, df2['category_id'], test_size=0.2, random_state=42)
 
-# fitting the model
 model = LogisticRegression()
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
-
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy:.2f}")
 
-# Save model and vectorizer
 joblib.dump(model, "model.pkl")
 joblib.dump(tfidf, "vectorizer.pkl")
 
-# Flask API for predictions
+# Flask app
 app = Flask(__name__)
 
-#Load the model once, not every time a request is made
+# Load the model once
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("vectorizer.pkl")
 
-@app.route("/predict", methods=["POST"])
+# Prometheus Metrics
+PREDICTION_REQUESTS = Counter("prediction_requests_total", "Total number of prediction requests")
+PREDICTION_LATENCY = Histogram("prediction_latency_seconds", "Time taken for a prediction")
 
+@app.route("/predict", methods=["POST"])
 def predict():
+    start_time = time.time()
+    PREDICTION_REQUESTS.inc()
+
     data = request.json
     text = data.get("text", "")
 
@@ -74,7 +62,14 @@ def predict():
     text_vectorized = vectorizer.transform([text])
     prediction = model.predict(text_vectorized)[0]
 
+    PREDICTION_LATENCY.observe(time.time() - start_time)
+
     return jsonify({"text": text, "prediction": int(prediction)})
 
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {"Content-Type": "text/plain; charset=utf-8"}
+
 if __name__ == "__main__":
+    start_http_server(8000)  # Prometheus metrics on port 8000
     app.run(host="0.0.0.0", port=5000)
