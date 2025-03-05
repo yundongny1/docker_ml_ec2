@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   flask-app:
+    container_name: flask-container
     build: .
     ports:
       - "5000:5000"
@@ -9,6 +10,7 @@ services:
       - monitoring
 
   prometheus:
+    container_name: prometheus-container
     image: prom/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
