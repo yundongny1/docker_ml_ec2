@@ -1,5 +1,5 @@
-# Containerizing a Python ML Model on AWS EC2
-Testing a python ML microservice - containerizing it with Docker on an AWS EC2 linux instance.
+# Building a Python ML Application on AWS EC2
+Testing a python ML microservice - containerizing it with Docker on an AWS EC2 linux instance. The model is a simple legal text classification model. Using the dataset from Kaggle, it trains and predicts the case outcome of the legal case text that the user inputs. It uses Flask API to handle incoming requests and generating responses, and Prometheus and Grafana to monitor the application. Prometheus and Grafana are on separate docker containers from the flask app for best practices.
 
 ### Technologies used:
 * Prometheus
@@ -13,7 +13,7 @@ Testing a python ML microservice - containerizing it with Docker on an AWS EC2 l
 This microservice uses the legal_text_classification.csv from https://www.kaggle.com/datasets/amohankumar/legal-text-classification-dataset.
 
 ### Instructions
-Assuming you are running an ubuntu instance on AWS EC2, steps for testing this application after cloning the repository:
+Assuming you are running an ubuntu instance on AWS EC2, steps for testing this application after cloning the repository into your EC2 instance:
 ```shell
 #SSH into your ubuntu instance using your key
 sudo apt update
