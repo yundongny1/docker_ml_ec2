@@ -18,6 +18,18 @@ services:
       - "9090:9090"
     networks:
       - monitoring
+  
+  grafana:
+    container_name: grafana-container
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Set Grafana admin password
+    ports:
+      - "3000:3000"  # Grafana web UI
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus  # Ensure Prometheus starts before Grafana
 
 networks:
   monitoring:
