@@ -37,6 +37,7 @@ These are the respective ports you want to be aware of. You can connect to the e
 * Grafana UI: 3000
 
 If you want to test the prediction of the application, use curl in your command line. The code will look something like this:
+
 curl -X POST PUBLIC_IPV4_DNS:5000/predict -H "Content-Type: application/json" -d '{"text": "The defendant is found not guilty."}'
 
 This will return a prediction.
